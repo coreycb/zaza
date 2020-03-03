@@ -273,7 +273,7 @@ def render_overlays(bundle, target_dir, model_ctxt=None):
     return overlays
 
 
-def deploy_bundle(bundle, model, model_ctxt=None):
+def deploy_bundle(bundle, overlay, model, model_ctxt=None):
     """Deploy the given bundle file in the specified model.
 
     :param bundle: Path to bundle file
@@ -288,11 +288,16 @@ def deploy_bundle(bundle, model, model_ctxt=None):
                  .format(bundle, model))
     cmd = ['juju', 'deploy', '-m', model, bundle]
     with tempfile.TemporaryDirectory() as tmpdirname:
-        for overlay in render_overlays(bundle, tmpdirname,
-                                       model_ctxt=model_ctxt):
+        for overlay_j2 in render_overlays(bundle, tmpdirname,
+                                          model_ctxt=model_ctxt):
             logging.info("Deploying overlay '{}' on to '{}' model"
-                         .format(overlay, model))
-            cmd.extend(['--overlay', overlay])
+                         .format(overlay_j2, model))
+            cmd.extend(['--overlay', overlay_j2])
+        for overlay_manual in overlay:
+            logging.info("Deploying overlay '{}' on to '{}' model"
+                         .format(overlay_manual, model))
+            cmd.extend(['--overlay', overlay_manual])
+        logging.info("CCB: deploy_bundle() cmd={}".format(cmd))
         utils.check_output_logging(cmd)
 
 
@@ -309,8 +314,9 @@ def deploy(bundle, model, wait=True, model_ctxt=None):
                        templates.
     :type model_ctxt: {}
     """
+    logging.info("CCB: HELLO WORLD FROM deploy.py")
     run_report.register_event_start('Deploy Bundle')
-    deploy_bundle(bundle, model, model_ctxt=model_ctxt)
+    deploy_bundle(bundle, overlay, model, model_ctxt=model_ctxt)
     run_report.register_event_finish('Deploy Bundle')
     if wait:
         run_report.register_event_start('Wait for Deployment')
@@ -338,6 +344,9 @@ def parse_args(args):
     parser.add_argument('-b', '--bundle',
                         help='Bundle name (excluding file ext)',
                         required=True)
+    parser.add_argument('-o', '--overlay',
+                        help='Overlay name (excluding file ext)',
+                        required=False)
     parser.add_argument('--no-wait', dest='wait',
                         help='Do not wait for deployment to settle',
                         action='store_false')
@@ -351,5 +360,5 @@ def main():
     """Deploy bundle."""
     args = parse_args(sys.argv[1:])
     cli_utils.setup_logging(log_level=args.loglevel.upper())
-    deploy(args.bundle, args.model, wait=args.wait)
+    deploy(args.bundle, args.override, args.model, wait=args.wait)
     run_report.output_event_report()

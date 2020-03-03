@@ -49,6 +49,7 @@ def run_env_deployment(env_deployment, keep_model=False):
         prepare.prepare(deployment.model_name)
 
     for deployment in env_deployment.model_deploys:
+        logging.info("CCB: HELLO WORLD FROM func_test_runner.py")
         deploy.deploy(
             os.path.join(
                 utils.BUNDLE_DIR, '{}.yaml'.format(deployment.bundle)),
@@ -56,7 +57,7 @@ def run_env_deployment(env_deployment, keep_model=False):
             model_ctxt=model_aliases)
 
     # When deploying bundles with cross model relations, hooks may be triggered
-    # in already deployedi models so wait for all models to settle.
+    # in already deployed models so wait for all models to settle.
     for deployment in env_deployment.model_deploys:
         logging.info("Waiting for {} to settle".format(deployment.model_name))
         zaza.model.block_until_all_units_idle(
