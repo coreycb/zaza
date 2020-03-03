@@ -49,6 +49,7 @@ def run_env_deployment(env_deployment, keep_model=False):
         prepare.prepare(deployment.model_name)
 
     for deployment in env_deployment.model_deploys:
+        print("CCB: HELLO WORLD FROM func_test_runner.py")
         deploy.deploy(
             os.path.join(
                 utils.BUNDLE_DIR, '{}.yaml'.format(deployment.bundle)),

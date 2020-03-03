@@ -309,6 +309,7 @@ def deploy(bundle, model, wait=True, model_ctxt=None):
                        templates.
     :type model_ctxt: {}
     """
+    print("CCB: HELLO WORLD FROM deploy.py")
     run_report.register_event_start('Deploy Bundle')
     deploy_bundle(bundle, model, model_ctxt=model_ctxt)
     run_report.register_event_finish('Deploy Bundle')
